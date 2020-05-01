@@ -1,0 +1,32 @@
+FROM php:7.3-fpm
+    
+    RUN apt-get update && apt-get install -y libmcrypt-dev mariadb-client \
+        && docker-php-ext-install pdo_mysql
+
+    RUN apt-get install -y zlib1g-dev libjpeg-dev libpng-dev libfreetype6-dev
+    RUN apt-get update && \
+    apt-get install -y --no-install-recommends git zip
+
+    RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+    RUN docker-php-ext-install gd calendar
+    RUN docker-php-ext-configure calendar
+    RUN apt-get install -y libc-client-dev libkrb5-dev && rm -r /var/lib/apt/lists/*
+    RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+    && docker-php-ext-install imap
+
+    RUN apt-get update \
+    || apt-get update \
+    && apt-get install -y \
+            libzip-dev \
+            zip \
+    && docker-php-ext-configure zip --with-libzip \
+    && docker-php-ext-install zip 
+
+    RUN docker-php-ext-install exif
+
+    RUN curl -s http://getcomposer.org/installer | php
+    RUN mv composer.phar /usr/local/bin/composer
+    RUN composer global require laravel/installer
+    ENV PATH="/root/.composer/vendor/bin:${PATH}"
+
+    WORKDIR /var/www

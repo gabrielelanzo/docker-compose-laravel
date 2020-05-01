@@ -1,0 +1,43 @@
+FROM php:7.3-fpm
+	
+	RUN apt-get update && apt-get install -y libmcrypt-dev mariadb-client \
+	    && docker-php-ext-install pdo_mysql
+    
+    RUN apt-get install -y zlib1g-dev libjpeg-dev libpng-dev libfreetype6-dev
+    RUN apt-get update && \
+    apt-get install -y --no-install-recommends git zip
+
+    RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+    RUN docker-php-ext-install gd
+    RUN apt-get install -y libc-client-dev libkrb5-dev && rm -r /var/lib/apt/lists/*
+    RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+    && docker-php-ext-install imap
+    
+    RUN apt-get install -y --no-install-recommends git zip
+
+    RUN curl -s http://getcomposer.org/installer | php
+    RUN mv composer.phar /usr/local/bin/
+    
+    RUN ["apt-get", "update"]
+
+    RUN ["apt-get", "install", "-y", "wget"]
+    RUN ["apt-get", "install", "-y", "zsh"]
+    RUN ["apt-get", "install", "-y", "git"]
+    RUN wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O - | zsh || true
+
+    RUN ["apt-get", "install", "-y", "vim"]
+    RUN ["apt-get", "install", "-y", "nano"]
+    RUN ["apt-get", "install", "-y", "ruby"]
+        
+    RUN apt-get update \
+    && apt-get install -y libzip-dev \
+    && apt-get install -y zlib1g-dev \
+    && apt-get install -y expect \
+    && rm -rf /var/lib/apt/lists/* \
+    && docker-php-ext-install zip 
+
+    RUN apt-get update && apt-get install -y telnet
+    RUN apt-get update && apt-get install -y openssh-client
+    
+
+	WORKDIR /var/www

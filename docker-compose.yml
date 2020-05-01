@@ -1,0 +1,59 @@
+version: '2'
+services:
+  composer:
+    build:
+      context: ./config/
+      dockerfile: composer.docker
+    volumes:
+      - ./src:/var/www
+    links:
+      - app
+  dev:
+    build:
+      context: ./config/
+      dockerfile: dev.docker
+    volumes:
+      - ./config/app:/usr/local/etc/php-fpm.d
+      - ./config/dev_bashrc:/root/.bashrc
+      - ./config/dev_zshrc:/root/.zshrc
+      - ./config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ~/.ssh:/root/.ssh
+      - ./src:/var/www
+    links:
+      - db          
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=db"
+  web:
+    build:
+      context: ./config/
+      dockerfile: web.docker
+    volumes:
+      - ./config/web/vhost.conf:/etc/nginx/conf.d/default.conf
+      - ./src:/var/www
+    ports:
+      - "8080:80"
+    links:
+      - app
+  app:
+    build:
+      context: ./config/
+      dockerfile: app.docker
+    volumes:
+      - ./config/app:/usr/local/etc/php-fpm.d
+      - ./config/bashrc:/root/.bashrc
+      - ./src:/var/www
+    links:
+      - db          
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=db"
+  db:
+    image: mysql:5.7
+    environment:
+      - "MYSQL_ROOT_PASSWORD=secret"
+      - "MYSQL_DATABASE=app"
+      - "PMA_HOST=db"
+    ports:
+      - "33060:3306"
+
